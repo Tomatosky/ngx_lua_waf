@@ -1,9 +1,13 @@
 attackLog = true
 logDir = "/home/wwwlogs"
-uriLengthCheck = true
-uriMaxLength = 30
-uriContentCheck = true
+
+checkRex = [['"`?\[\](){}+*$%=,&|<>^@#]]
+
+uriCheck = true
+uriCheckCode = 404
+
 CCDeny = true
 CCCount = 100
 CCDuration = 60
 CCBlockTime = 600
+CCCode = 502

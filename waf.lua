@@ -1,6 +1,5 @@
 if denyCC() then
-elseif uriContent() then
-elseif uriLength() then
+elseif uri() then
 else
     return
 end

@@ -74,9 +74,10 @@ function denyCC()
             if req == CCCount then
                 limit:set(token, CCCount + 1, CCBlockTime)
                 log('CC', '-')
+                ngx.exit(CCCode)
                 return true
             elseif req > CCCount then
-                ngx.exit(502)
+                ngx.exit(CCCode)
                 return true
             else
                 limit:incr(token, 1)
@@ -88,26 +89,30 @@ function denyCC()
     return false
 end
 
-function uriLength()
-    if uriLengthCheck then
-        local request_uri = ngx.var.request_uri
-        if utf8len(request_uri) > uriMaxLength then
-            log('too long', request_uri)
-            ngx.exit(404)
-        end
-    end
-    return false
-end
-
-function uriContent()
-    if uriContentCheck then
+function uri()
+    if uriCheck then
         local request_uri = ngx.var.request_uri
         if request_uri ~= nil then
-            local regex = [['"?()+%=,&]]
-            if ngxFind(request_uri, "[" .. regex .. "]", "jo") then
-                log('illegal', request_uri)
-                ngx.exit(404)
+            if ngxFind(request_uri, "[" .. checkRex .. "]", "jo") then
+                log('illegal uri', request_uri)
+                ngx.exit(uriCheckCode)
                 return true
+            end
+        end
+
+        local method = ngx.req.get_method()
+        if method == "POST" then
+            ngx.req.read_body()
+            local args = ngx.req.get_post_args()
+            if not args then
+                return
+            end
+            for key, val in pairs(args) do
+                if ngxFind(val, "[" .. checkRex .. "]", "jo") then
+                    log('illegal value', val)
+                    ngx.exit(uriCheckCode)
+                    return true
+                end
             end
         end
     end
